@@ -1,0 +1,167 @@
+---
+title: "Boston Celtics Player Analysis Current Season"
+author: "Kaden"
+date: "2024-12-25"
+output: html_document
+---
+#The purpose of this analysis is to determine which player's need improvements for the current Boston Celtics 2024-2025 season.
+
+#Loading all necessary packages for the project (you will need to install the package beforehand with the "install.packages" function)
+
+```{r}
+library(rvest) #For webscraping
+
+library(dplyr) #For any data manipulation
+
+library(ggplot2) #For data visualizations
+
+library(tidyr) #For data cleaning
+
+library(jsonlite) #Useful for API scraping
+
+library(httr) #For handling HTTP requests
+
+```
+
+#Data Scraping
+```{r}
+boston_url <- "https://www.basketball-reference.com/teams/BOS/2025.html" #this URL contains stats that are from the trusted basketball-reference website.
+
+boston_data <- read_html(boston_url) #This will read the HTML content.
+```
+
+#Extracting the table containing Boston player stats.
+```{r}
+boston_stats <- boston_data %>%
+  html_node("#per_game_stats") %>%
+  html_table(fill = TRUE)
+```
+
+#Preview the data
+```{r}
+head(boston_stats)
+```
+
+
+
+#Cleaning The Data
+```{r}
+boston_clean <- boston_stats %>%
+  filter(!is.na(Player)) %>% #giving us all Players that are not NA
+  filter(!grepl("Total", Player)) %>% #Remove the Team Totals Row
+  select(Player, PTS, AST, TRB, `3P%`, `FG%`, `FT%`, MP,) %>% #Selecting only the stats we want to look at from the table
+  drop_na() #Removes players with empty stats
+```
+
+
+
+#Preview the Clean Data 
+```{r}
+head(boston_clean)
+```
+
+#Calculating the Team Average
+```{r}
+boston_avg <- boston_clean %>%
+  summarise(
+    avg_PTS = mean(PTS),
+    avg_AST = mean(AST),
+    avg_TRB = mean(TRB),
+    avg_3PPercent = mean(`3P%`),
+    avg_FTPercent = mean(`FT%`),
+    avg_FGPercent = mean(`FG%`),
+    avg_MP = mean(MP)
+  )
+
+print(boston_avg)
+```
+
+#Indentify Underpeforming Players
+```{r}
+underperformed_plyrs <- boston_clean %>%
+  filter(
+  PTS < boston_avg$avg_PTS,
+  AST < boston_avg$avg_AST,
+  `FG%` < boston_avg$avg_FGPercent
+)
+print(underperformed_plyrs)
+```
+
+#Visualizations!!!!
+```{r} 
+boston_clean <- boston_clean %>%
+  mutate(above_avg = PTS >= boston_avg$avg_PTS)
+#this will showcase players who are above the Team's Average in total Points Vs. players who are Below Team's Average.
+
+ggplot(boston_clean, aes(x = reorder(Player, PTS), y = PTS, fill = above_avg)) +
+  geom_bar(stat = "identity") + 
+  coord_flip() + 
+  geom_text(aes(label = PTS), position = position_stack(0.5), color = 'white', fontface = "bold", size = 2.3) +
+  labs(title = "Boston Celtics Points per Game vs. Team Average",
+      x = "Player",
+      y = "Points per Game") +
+  scale_fill_manual(values = c("black", "forest green"),labels = c("Below Average", "Above Average")) +
+  theme_minimal()
+```
+
+
+```{r}
+ggplot(boston_clean, aes(x = MP, y = PTS)) +
+  geom_point(aes(color = Player, size = 0.1)) +
+  geom_text(
+    data = subset(boston_clean, MP > 10), 
+    aes(label = Player), 
+    vjust = -0.5 , hjust = 1.2, size = 2.5, color = "black"
+  ) +
+  scale_x_continuous(limits = c(2,40), breaks = seq(2,40,5)) +
+  scale_y_continuous(limits = c(0, 30), breaks = seq(0,30,2)) +
+  labs(
+    title = "Minutes Played Per Game Vs. Points Per Game",
+    subtitle = "Relationship between MP and PPG for players",
+    x = "Minutes Played per Game",
+    y = "Point per Game"
+  ) +
+  theme_minimal() +
+  theme(legend.key.size = unit(0.5, "cm"))
+```
+
+
+
+```{r}
+
+# Create a dataset for underperforming players
+underperforming <- boston_clean %>% 
+  filter(Player %in% underperformed_plyrs$Player) %>%
+  select(Player, MP, PTS, FG., AST)
+
+# Reshape data to long format for faceting
+underperforming_long <- underperforming %>%
+  pivot_longer(cols = c(PTS, FG., AST), names_to = "Stat", values_to = "Value")
+
+# Calculate team averages
+team_avg <- boston_clean %>%
+  summarise(avg_PTS = mean(PTS, na.rm = TRUE),
+            avg_FG = mean(FG., na.rm = TRUE),
+            avg_AST = mean(AST, na.rm = TRUE)) %>%
+  pivot_longer(cols = everything(), names_to = "Stat", values_to = "Avg")
+
+# Merge averages with underperforming players data
+underperforming_long <- underperforming_long %>%
+  left_join(team_avg, by = "Stat")
+
+# Plot
+ggplot(underperforming_long, aes(x = Player, y = Value, fill = Stat)) +
+  geom_bar(stat = "identity", position = "dodge") + # Bars for players' performance
+  geom_hline(aes(yintercept = Avg), color = "red", linetype = "dashed") + # Team Average
+  facet_wrap(~ Stat, scales = "free_y") + # Separate facets for each category
+  labs(
+    title = "Underperforming Players vs Team Average",
+    subtitle = "Comparison in PPG, FG%, and AST",
+    x = "Player",
+    y = "Value"
+  ) +
+  scale_fill_manual(values = c("PTS" = "blue", "FG." = "green", "AST" = "orange")) + # Colors for stats
+  theme_minimal() +
+  theme(legend.position = "top")
+
+```
