@@ -15,7 +15,7 @@ I wanted to apply R programming using a real-world data set and improve my abili
 2. Extracted the HTML table and previewed the data
 3. Cleaned the data by:
    - Removing players with missing stats
-   - Focused on key metrics:
+   - Focusing on key metrics:
    - Points Per Game
    - Three Point Percentage
    - Total Rebounds
