@@ -3,6 +3,7 @@ Exploring Boston Celtics Stats with R
 # Boston Celtics Player Analysis 2024-2025 Season 
 This analysis contains a project I started for the Boston Celtics current 2024-2025 season on Christmas day. Due to the conclusion of the season the data has been updated. This data set pulls from the Basketball-Reference URL. This project demonstrates my ability to data mine with R, data wrangling and exploratory visualization in the early stages of my career building skills.
 
+
 ## Why I Did This
 I wanted to apply R programming using a real-world data set and improve my ability to
 - Scrape live data from websites such as Basketball-Reference
@@ -34,6 +35,6 @@ I wanted to apply R programming using a real-world data set and improve my abili
 - boston_celtics_2025_season_stats.Rmd - Full Analysis in R
 - boston_celtics_2025_season_stats.html - Rendered version with visuals (download document to see visualizations)
 - README.md - project summary
-
+ **Note:** The date on the file reflects the day I started the analysis. The data pulls from a live website and was updated to match the current stats for the completed season.
 ## Future Improvements
 - Update Analysis with complete 2024-2025 season stats
