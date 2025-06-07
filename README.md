@@ -1,7 +1,7 @@
 # boston-celtics-r-analysis
 Exploring Boston Celtics Stats with R
 # Boston Celtics Player Analysis 2024-2025 Season from Start to Christmas
-This analysis contains a project I did on the Boston Celtics current 2024-2025 season from the start up until Christmas. This data has NOT been updated since. However, I wanted to analyze how the team was peforming up until that point in time. This project demonstrates my ability to data mine with R, data wrangling and exploratory visualization in my early stages of my career.
+This analysis contains a project I did on the Boston Celtics current 2024-2025 season from the start up until Christmas. This data has NOT been updated since. However, I wanted to analyze how the team was peforming up until that point in time. This project demonstrates my ability to data mine with R, data wrangling and exploratory visualization in the early stages of my career building skills.
 
 ## Why I Did This
 I wanted to apply R programming using a real-world data set and improve my ability to
